@@ -11,9 +11,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String apparentTemperature = "";
-  String temperature = "";
-  String precipitation = "";
+  double elevation = 0.0;
+  String time = "";
+  double apparentTemperature = 0.0;
+  double temperature = 0.0;
+  double precipitation = 0.0;
   bool isDay = true;
   double latitude = 0.0;
   double longitude = 0.0;
@@ -24,9 +26,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void fetchWeather() async {
     weather = await weatherRepo.getWeather();
     setState(() {
-      apparentTemperature = weather.current.apparentTemperature.toString();
-      temperature = weather.current.temperature.toString();
-      precipitation = weather.current.precipitation.toString();
+      elevation = weather.elevation;
+      time = weather.current.time.toString();
+      apparentTemperature = weather.current.apparentTemperature;
+      temperature = weather.current.temperature;
+      precipitation = weather.current.precipitation;
       isDay = weather.current.isDay;
       latitude = weather.latitude;
       longitude = weather.longitude;
@@ -46,26 +50,27 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             const Text(
-              "Stadt: \nStuttgart",
+              "Stadt: Werther",
               style: TextStyle(
                 fontSize: 30,
                 color: Colors.blue,
               ),
             ),
-            Text("Gefühlte Temperatur:  \n$apparentTemperature"),
+            Text("Gefühlte Temperatur:  $apparentTemperature"),
             Text(
-              "Temperatur: \n$temperature",
+              "Temperatur: $temperature",
             ),
             Text(
-              "Niederschlag: \n$precipitation",
+              "Niederschlag: $precipitation",
             ),
             Text(
-              isDay ? "Tageszeit: \nTag" : "Tageszeit: \nNacht",
+              isDay ? "Tageszeit: Tag" : "Tageszeit: Nacht",
             ),
-            Center(
-              child: Text(
-                "Standort: \n $latitude,  \n $longitude",
-              ),
+            Text(
+              "Standort:  $latitude,   $longitude",
+            ),
+            Text(
+              "Höhe über NN:  $elevation",
             ),
             TextButton(
               onPressed: () {
@@ -84,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: const Text("Vorhersage updaten"),
             ),
+            Text("letzes Update:  $time"),
           ],
         ),
       ),
