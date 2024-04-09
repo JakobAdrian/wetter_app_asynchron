@@ -11,9 +11,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: "Wetter App",
-      home:  MyHomePage(title: "Wetter App"),
-    );
+   return MaterialApp(
+  title: "Wetter App",
+  theme: ThemeData(
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+      ),
+    ),
+  ),
+  home: const MyHomePage(title: "Wetter App"),
+);
   }
 }
