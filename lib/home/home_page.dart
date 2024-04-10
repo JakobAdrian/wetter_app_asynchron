@@ -11,30 +11,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double elevation = 0.0;
-  String time = "";
-  double apparentTemperature = 0.0;
-  double temperature = 0.0;
-  double precipitation = 0.0;
-  bool isDay = true;
-  double latitude = 0.0;
-  double longitude = 0.0;
-
   WeatherRepository weatherRepo = WeatherRepository();
+
   late Weather weather;
 
-  void fetchWeather() async {
-    weather = await weatherRepo.getWeather();
-    setState(() {
-      elevation = weather.elevation;
-      time = weather.current.time.toString();
-      apparentTemperature = weather.current.apparentTemperature;
-      temperature = weather.current.temperature;
-      precipitation = weather.current.precipitation;
-      isDay = weather.current.isDay;
-      latitude = weather.latitude;
-      longitude = weather.longitude;
-    });
+  Future<Weather> fetchWeather() async {
+    return weatherRepo.getWeather();
   }
 
   @override
@@ -46,52 +28,72 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            const Text(
-              "Stadt: Werther",
-              style: TextStyle(
-                fontSize: 30,
-                color: Colors.blue,
-              ),
-            ),
-            Text("Gefühlte Temperatur:  $apparentTemperature"),
-            Text(
-              "Temperatur: $temperature",
-            ),
-            Text(
-              "Niederschlag: $precipitation",
-            ),
-            Text(
-              isDay ? "Tageszeit: Tag" : "Tageszeit: Nacht",
-            ),
-            Text(
-              "Standort:  $latitude,   $longitude",
-            ),
-            Text(
-              "Höhe über NN:  $elevation",
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  fetchWeather();
-                });
-              },
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: const BorderSide(
-                        color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+        child: FutureBuilder<Weather>(
+            future: fetchWeather(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  const Text(
+                    "Stadt: Werther",
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.blue,
+                    ),
                   ),
-                ),
-              ),
-              child: const Text("Vorhersage updaten"),
-            ),
-            Text("letzes Update:  $time"),
-          ],
-        ),
+                  Text(
+                      "Gefühlte Temperatur: ${snapshot.hasData ? snapshot.data!.current.apparentTemperature : 0}  °C"),
+                  Text(
+                    "Temperatur: ${snapshot.hasData ? snapshot.data!.current.temperature : 0}°C",
+                  ),
+                  Text(
+                    "Niederschlag: ${snapshot.hasData ? snapshot.data!.current.precipitation : 0} mm",
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Tageszeit: "),
+                      Text(
+                          
+                        snapshot.hasData
+                            ? (snapshot.data!.current.isDay)
+                                ? "Tag"
+                                : "Nacht"
+                            : "",),
+                    ],
+                  ),
+
+                  Text(
+                    "Standort:  ${snapshot.hasData ? snapshot.data!.latitude : 0},   ${snapshot.hasData ? snapshot.data!.longitude : 0}",
+                  ),
+                  Text(
+                    "Höhe über NN:  ${snapshot.hasData ? snapshot.data!.elevation : 0} m",
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        fetchWeather();
+                      });
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: const BorderSide(
+                              color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                        ),
+                      ),
+                    ),
+                    child: const Text("Vorhersage updaten"),
+                  ),
+                  Text(
+                      "letzes Update:  ${snapshot.hasData ? snapshot.data!.current.time : 0}"),
+                ],
+              );
+            }),
       ),
     );
   }
