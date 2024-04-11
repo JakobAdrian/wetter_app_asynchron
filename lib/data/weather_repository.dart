@@ -1,33 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:weather_application_2/data/location_repository.dart';
 
 class WeatherRepository {
-  static const _apiKey =
-      "https://api.open-meteo.com/v1/forecast?latitude=52.0777&longitude=8.4179&current=temperature_2m,apparent_temperature,is_day,precipitation,rain&hourly=is_day,sunshine_duration&timezone=Europe%2FBerlin&forecast_hours=24";
+  Future<Weather> getWeather(Location location) async {
+    double latitude = location.latitude;
+    double longitude = location.longtitude;
 
-// API Response:
-// {"latitude":48.78,
-// "longitude":9.18,
-// "generationtime_ms":0.05698204040527344,
-// "utc_offset_seconds":7200,
-// "timezone":"Europe/Berlin","timezone_abbreviation":"CEST",
-// "elevation":247.0,
-// "current_units":{
-// "time":"iso8601","interval":"seconds","temperature_2m":"°C","apparent_temperature":"°C","is_day":"","precipitation":"mm"},
-// "current":{
-//   "time":"2024-04-09T15:15",
-//   "interval":900,
-//   "temperature_2m":12.1,
-//   "apparent_temperature":8.6,
-//   "is_day":1,
-//   "precipitation":0.00}
-// }
+    String _url =
+        "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current=temperature_2m,apparent_temperature,is_day,precipitation,rain&hourly=is_day,sunshine_duration&timezone=Europe%2FBerlin&forecast_hours=24";
 
-  Future<Weather> getWeather() async {
-    final response = await http.get(Uri.parse(_apiKey));
+    final response = await http.get(Uri.parse(_url));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      print(response.body);
+      // print("api-open-mateo-com: ${response.body}");
       return Weather.fromJson(json);
     } else {
       throw Exception("Failed to load weather");
