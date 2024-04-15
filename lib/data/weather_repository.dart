@@ -5,9 +5,9 @@ import 'package:weather_application_2/data/location_repository.dart';
 class WeatherRepository {
   Future<Weather> getWeather(Location location) async {
     double latitude = location.latitude;
-    double longitude = location.longtitude;
+    double longitude = location.longitude;
 
-    String _url =
+    final String _url =
         "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current=temperature_2m,apparent_temperature,is_day,precipitation,rain&hourly=is_day,sunshine_duration&timezone=Europe%2FBerlin&forecast_hours=24";
 
     final response = await http.get(Uri.parse(_url));
@@ -42,6 +42,14 @@ class Weather {
       current: CurrentWeather.fromJson(json["current"]),
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      "elevation": elevation,
+      "latitude": latitude,
+      "longitude": longitude,
+      "current": current,
+    };
+  }
 }
 
 class CurrentWeather {
@@ -65,5 +73,14 @@ class CurrentWeather {
       isDay: json["is_day"] == 1,
       precipitation: json["precipitation"],
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      "time": time,
+      "temperature": temperature,
+      "apparentTemperature": apparentTemperature,
+      "isDay": isDay,
+      "precipitation": precipitation,
+    };
   }
 }

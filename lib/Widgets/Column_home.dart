@@ -1,84 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:weather_application_2/data/location_repository.dart';
 import 'package:weather_application_2/data/weather_repository.dart';
+import 'package:weather_application_2/home/home_page.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
 
-  final String title;
+class ColumnHome
+ extends StatefulWidget {
+   const ColumnHome
+  ({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ColumnHome> createState() => _ColumnHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _ColumnHomeState extends State<ColumnHome> {
   final TextEditingController _controller = TextEditingController();
-  
 
   WeatherRepository weatherRepo = WeatherRepository();
+
   LocationRepository locationRepo = LocationRepository();
+
   String city = "";
 
-  Future<Location> fetchCity() async {
+Future<Location> fetchCity() async {
     city = _controller.text;
-    return locationRepo.getCity(_controller.text);
+    return locationRepo.getCity(city);
   }
 
   Future<Weather> fetchWeather() async {
     return weatherRepo.getWeather(await fetchCity());
   }
-@override
-  void initState() {
-    super.initState();
-    _loadSavedCity();
+void saveCityName() async {
+    final Location location = await fetchCity();
+    locationRepo.saveCityName(location);
+    print(location.name);
   }
-  void _loadSavedCity() async {
-    final Location? location = await locationRepo.getSavedCityName();
-    if (location != null) {
-      _controller.text = location.name;
-    }
-  }
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title:
-            Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            FutureBuilder<Location>(
-              future: fetchCity(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                return Padding(
-                  padding: const EdgeInsets.all(25.0),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      labelText: "Stadt eingeben",
-                    ),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.blue,
-                    ),
-                  ),
-                );
-              },
-            ),
-            Text("Wetterdaten für: $city",
-                style: const TextStyle(fontSize: 20, color: Colors.blue)),
-            FutureBuilder<Weather>(
+    return FutureBuilder<Weather>(
               future: fetchWeather(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -117,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     TextButton(
                       onPressed: () {
                         setState(() {
+                          saveCityName();
                           fetchWeather();
                         });
                       },
@@ -138,10 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 );
               },
-            ),
-          ],
-        ),
-      ),
-    );
+            );
   }
 }
+
+

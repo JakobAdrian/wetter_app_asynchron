@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'package:http/http.dart' as http;
-import 'package:weather_application_2/home/home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationRepository {
   static const _apiKey = "T6TAVxg5YZfGUrrEk16H0Q==hENsMFUl3TZ3EtoB";
@@ -17,20 +18,54 @@ class LocationRepository {
       throw Exception("Failed to load weather");
     }
   }
+
+  Future<Location?> getSavedCityName() async {
+    final SharedPreferences prefs =
+        await SharedPreferences.getInstance(); //aus der Dokumentation kopiert
+
+    final nameString = prefs.getString("name");
+    if (nameString == null) {
+      return null;
+    }
+    final jsonMap = jsonDecode(nameString);
+    final nameObjekt = Location.fromJson(jsonMap);
+    return nameObjekt;
+  }
+
+  Future<void> saveCityName(Location name) async {
+    final SharedPreferences prefs =
+        await SharedPreferences.getInstance(); //aus der Dokumentation kopiert
+
+    final nameMap = name.toJson();
+    final nameString = jsonEncode(nameMap);
+    await prefs.setString("name", nameString);
+  }
 }
 
 class Location {
-  final double longtitude;
+  final String name;
+  final double longitude;
   final double latitude;
 
   Location({
-    required this.longtitude,
+    required this.name,
+    required this.longitude,
     required this.latitude,
   });
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
-      longtitude: json["longitude"],
+      name: json["name"],
+      longitude: json["longitude"],
       latitude: json["latitude"],
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "longitude": longitude,
+      "latitude": latitude,
+    };
+  }
+
+  
 }
